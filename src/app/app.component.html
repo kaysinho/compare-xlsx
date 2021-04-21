@@ -1,4 +1,3 @@
-
 <h2 class="text-center">Global Employee Dataset Tool</h2>
 
 <div class="container">
@@ -6,18 +5,42 @@
     <div class="row">
       <div class="form-group">
         <label for="lastFile">Add the new version of the Global Employee dataset Excel file</label>
-        <input type="file" class="form-control-file" multiple="false" (change)="onNewFileChange($event)" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" id="lastFile">
+        <input type="file" class="form-control-file" multiple="false" (change)="onNewFileChange($event)"
+          accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+          id="lastFile">
       </div>
     </div>
 
     <div class="row">
       <div class="form-group">
         <label for="previousFile">Add the previous version of the Global Employee dataset Excel file</label>
-        <input type="file" class="form-control-file"  multiple="false" (change)="onPreviousFileChange($event)" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" id="previousFile">
+        <input type="file" class="form-control-file" multiple="false" (change)="onPreviousFileChange($event)"
+          accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+          id="previousFile">
       </div>
     </div>
   </form>
+  <div class="row">
+    <div class="col-md-6">
+      <button type="button" class="btn btn-primary btn-lg  mx-auto " (click)="compare()"
+        [disabled]="newFile.length<1 || previousFile.length<1">Compare</button>
+    </div>
+    <div class="col-md-6">
+      <button type="button" class="btn btn-secondary btn-lg  mx-auto " (click)="reset()">Reset</button>
+    </div>
 
-  <button type="button" class="btn btn-primary btn-lg  mx-auto d-block" (click)="compare()" [disabled]="newFile.length<1 || previousFile.length<1">Compare</button>
+  </div>
+
+  <ul class="list-group">
+    <li class="list-group-item">News: {{ newRecords.length }} <button type="button" [disabled]="newRecords.length<1"
+        class="btn btn-success  mx-auto" (click)="download('news')">Download</button></li>
+    <li class="list-group-item">Deleted: {{ deletedRecords.length }} <button type="button"
+        [disabled]="deletedRecords.length<1" class="btn btn-danger  mx-auto"
+        (click)="download('deleted')">Download</button></li>
+    <li class="list-group-item">Updates: {{ editedRecords.length }} <button type="button"
+        [disabled]="editedRecords.length<1" class="btn btn-warning  mx-auto"
+        (click)="download('updated')">Download</button></li>
+  </ul>
+
 
 </div>

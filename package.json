@@ -19,11 +19,13 @@
     "@angular/platform-browser": "~11.2.8",
     "@angular/platform-browser-dynamic": "~11.2.8",
     "@angular/router": "~11.2.8",
+    "file-saver": "^2.0.5",
     "read-excel-file": "^5.1.0",
     "rxjs": "~6.6.0",
     "ts-xlsx": "0.0.11",
     "tslib": "^2.0.0",
     "xlsx": "^0.16.9",
+    "xlsx-workbook": "^1.0.3",
     "zone.js": "~0.11.3"
   },
   "devDependencies": {
