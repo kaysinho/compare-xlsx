@@ -15,7 +15,6 @@ addEventListener('message', ({ data }) => {
       newRecords.push(current);
     }
   }
-  console.log('news ', newRecords);
   postMessage({ newRecords });
 
   // deleted
@@ -24,7 +23,6 @@ addEventListener('message', ({ data }) => {
       deletedRecords.push(old);
     }
   }
-  console.log('deleted ', deletedRecords);
   postMessage({ deletedRecords });
 
   //updated
@@ -37,6 +35,5 @@ addEventListener('message', ({ data }) => {
       }
     }
   }
-  console.log('edited ', editedRecords);
   postMessage({ editedRecords });
 });

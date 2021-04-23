@@ -7,6 +7,10 @@ import * as XLSX from 'xlsx';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
+  readingNewFile : boolean = false;
+  readingPreviousFile : boolean = false;
+
+  writing : boolean = false;
   readonly NEW = 'new';
   readonly OLD = 'old';
   newFile: any = [];
@@ -19,6 +23,9 @@ export class AppComponent {
   constructor() {}
 
   onFileChange(status: string, ev: any) {
+    status === this.NEW
+        ? (this.readingNewFile = true)
+        : (this.readingPreviousFile = true);
     let workBook: any = null;
     let jsonData = null;
     const reader = new FileReader();
@@ -32,9 +39,15 @@ export class AppComponent {
         return initial;
       }, {});
       const dataString = JSON.stringify(jsonData);
-      status === this.NEW
-        ? (this.newFile = jsonData)
-        : (this.previousFile = jsonData);
+      console.log(dataString)
+      if (status === this.NEW){
+        this.newFile = jsonData
+        this.readingNewFile = false
+      }else{
+        this.previousFile = jsonData
+        this.readingPreviousFile = false
+      }
+
       this.test = jsonData;
     };
     reader.readAsBinaryString(file);
@@ -42,6 +55,7 @@ export class AppComponent {
 
   async compare() {
     if (typeof Worker !== 'undefined') {
+      this.writing = true
       const worker = new Worker('./excel.worker', { type: 'module' });
       worker.onmessage = (response) => {
         const {

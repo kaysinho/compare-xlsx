@@ -4,55 +4,39 @@
   <form>
     <div class="row">
       <div class="form-group">
-        <label for="lastFile"
-          >Add the new version of the Global Employee dataset Excel file</label
-        >
-        <input
-          type="file"
-          class="form-control-file"
-          multiple="false"
-          (change)="onFileChange(NEW, $event)"
+        <label for="newFile">Add the new version of the Global Employee dataset Excel file</label>
+        <input type="file" class="form-control-file" multiple="false" (change)="onFileChange(NEW, $event)"
           accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-          id="lastFile"
-        />
+          id="newFile" />
+          <div class="spinner-border" role="status" *ngIf="readingNewFile">
+            <span class="sr-only"></span>
+          </div>
       </div>
     </div>
 
     <div class="row">
       <div class="form-group">
-        <label for="previousFile"
-          >Add the previous version of the Global Employee dataset Excel
-          file</label
-        >
-        <input
-          type="file"
-          class="form-control-file"
-          multiple="false"
-          (change)="onFileChange(OLD, $event)"
+        <label for="previousFile">Add the previous version of the Global Employee dataset Excel
+          file</label>
+        <input type="file" class="form-control-file" multiple="false" (change)="onFileChange(OLD, $event)"
           accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-          id="previousFile"
-        />
+          id="previousFile" />
+          <div class="spinner-border" role="status" *ngIf="readingPreviousFile">
+            <span class="sr-only"></span>
+          </div>
       </div>
     </div>
   </form>
   <div class="row">
     <div class="col-md-6">
-      <button
-        type="button"
-        class="btn btn-primary btn-lg mx-auto"
-        (click)="compare()"
-        [disabled]="newFile.length < 1 || previousFile.length < 1"
-      >
+      <button type="button" class="btn btn-primary btn-lg mx-auto" (click)="compare()"
+        [disabled]="newFile.length < 1 || previousFile.length < 1">
         Compare
       </button>
     </div>
     <div class="col-md-6">
-      <button
-        [disabled]="newFile.length < 1 || previousFile < 1"
-        type="button"
-        class="btn btn-secondary btn-lg mx-auto"
-        (click)="reset()"
-      >
+      <button [disabled]="newFile.length < 1 || previousFile < 1" type="button" class="btn btn-secondary btn-lg mx-auto"
+        (click)="reset()">
         Reset
       </button>
     </div>
@@ -61,36 +45,34 @@
   <ul class="list-group">
     <li class="list-group-item">
       New: {{ newRecords?.length }}
-      <button
-        type="button"
-        [disabled]="newRecords.length < 1"
-        class="btn btn-success mx-auto"
-        (click)="download('new')"
-      >
+      <button type="button" [disabled]="newRecords.length < 1" class="btn btn-primary mx-auto"
+        (click)="download('new')">
         Download
       </button>
+      <div class="spinner-border" role="status" *ngIf="writing && newRecords.length == 0">
+        <span class="sr-only"></span>
+      </div>
     </li>
     <li class="list-group-item">
       Deleted: {{ deletedRecords?.length }}
-      <button
-        type="button"
-        [disabled]="deletedRecords.length < 1"
-        class="btn btn-danger mx-auto"
-        (click)="download('deleted')"
-      >
+      <button type="button" [disabled]="deletedRecords.length < 1" class="btn btn-primary mx-auto"
+        (click)="download('deleted')">
         Download
       </button>
+      <div class="spinner-border" role="status" *ngIf="writing && deletedRecords.length == 0">
+        <span class="sr-only"></span>
+      </div>
     </li>
     <li class="list-group-item">
       Updated: {{ editedRecords?.length }}
-      <button
-        type="button"
-        [disabled]="editedRecords.length < 1"
-        class="btn btn-warning mx-auto"
-        (click)="download('updated')"
-      >
+      <button type="button" [disabled]="editedRecords.length < 1" class="btn btn-primary mx-auto"
+        (click)="download('updated')">
         Download
       </button>
+
+      <div class="spinner-border" role="status" *ngIf="writing && editedRecords.length == 0">
+        <span class="sr-only"></span>
+      </div>
     </li>
   </ul>
 </div>
