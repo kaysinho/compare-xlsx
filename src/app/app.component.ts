@@ -9,15 +9,14 @@ import * as XLSX from 'xlsx';
 export class AppComponent {
   readonly NEW = 'new';
   readonly OLD = 'old';
+  readonly startAt = 'A5';
   newFile: any = [];
   previousFile: any = [];
   updateEveryMS = 1000;
   newRecords: Array<any> = [];
   deletedRecords: Array<any> = [];
   editedRecords: Array<any> = [];
-  test: any;
   constructor() {}
-
   onFileChange(status: string, ev: any) {
     let workBook: any = null;
     let jsonData = null;
@@ -26,16 +25,18 @@ export class AppComponent {
     reader.onload = (event) => {
       const data = reader.result;
       workBook = XLSX.read(data, { type: 'binary' });
+      const ref = workBook.Sheets.Sheet1['!ref'];
+      const endAt = ref.split(':')[1];
+      const range = `${this.startAt}:${endAt}`;
       jsonData = workBook.SheetNames.reduce((initial: any, name: any) => {
         const sheet = workBook.Sheets[name];
-        initial[name] = XLSX.utils.sheet_to_json(sheet);
+        initial[name] = XLSX.utils.sheet_to_json(sheet, { range });
         return initial;
       }, {});
       const dataString = JSON.stringify(jsonData);
       status === this.NEW
         ? (this.newFile = jsonData)
         : (this.previousFile = jsonData);
-      this.test = jsonData;
     };
     reader.readAsBinaryString(file);
   }
@@ -68,7 +69,7 @@ export class AppComponent {
   equals = (a: any, b: any): boolean => JSON.stringify(a) === JSON.stringify(b);
 
   download(type: string) {
-    let fileName: string = '';
+    let fileName = '';
     let file: Array<any> = [];
     switch (type) {
       case 'new':
