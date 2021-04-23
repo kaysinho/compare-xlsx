@@ -7,18 +7,37 @@ import * as XLSX from 'xlsx';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
+  readonly NEW = 'new';
+  readonly OLD = 'old';
+  startAt = 'A1';
   readingNewFile: boolean = false;
   readingPreviousFile: boolean = false;
   writing: boolean = false;
-  readonly NEW = 'new';
-  readonly OLD = 'old';
-  readonly startAt = 'A1';
   newFile: any = [];
   previousFile: any = [];
   updateEveryMS = 1000;
   newRecords: Array<any> = [];
   deletedRecords: Array<any> = [];
   editedRecords: Array<any> = [];
+  sheetName: string = '';
+  customArray = [
+    'GUI',
+    'Region',
+    'Country',
+    'WLC',
+    'Location',
+    'UPN',
+    'Last Name',
+    'First Name',
+    'Service Line',
+    'Organization',
+    'SMU Name',
+    'Title',
+    'Rank',
+    'Work Phone',
+    'EA Name',
+    'EA Phone',
+  ];
   constructor() {}
   onFileChange(status: string, ev: any) {
     status === this.NEW
@@ -31,14 +50,14 @@ export class AppComponent {
     reader.onload = (event) => {
       const data = reader.result;
       workBook = XLSX.read(data, { type: 'binary' });
-      const nameSheet = workBook.SheetNames[0]
-      const ref = workBook.Sheets[nameSheet]['!ref'];
+      this.sheetName = workBook.SheetNames[0];
+      const ref = workBook.Sheets[this.sheetName]['!ref'];
       const endAt = ref.split(':')[1];
       const range = `${this.startAt}:${endAt}`;
       jsonData = workBook.SheetNames.reduce((initial: any, name: any) => {
         const sheet = workBook.Sheets[name];
         initial[name] = XLSX.utils.sheet_to_json(sheet, { range });
-        return initial;
+        return this.filterByCustomColumns(initial[name]);
       }, {});
       if (status === this.NEW) {
         this.newFile = jsonData;
@@ -70,15 +89,23 @@ export class AppComponent {
         }
       };
       worker.postMessage({
-        newFile: this.newFile.Sheet1,
-        oldFile: this.previousFile.Sheet1,
+        newFile: this.newFile,
+        oldFile: this.previousFile,
       });
     } else {
       console.log('couldnt run');
     }
   }
   equals = (a: any, b: any): boolean => JSON.stringify(a) === JSON.stringify(b);
-
+  filterByCustomColumns = (sheet: any) =>
+    sheet.map((jsonData: any) =>
+      Object.keys(jsonData)
+        .filter((key) => this.customArray.includes(key))
+        .reduce((custom: any, key) => {
+          custom[key] = jsonData[key];
+          return custom;
+        }, {})
+    );
   download(type: string) {
     let fileName = '';
     let file: Array<any> = [];
@@ -102,7 +129,7 @@ export class AppComponent {
 
     /* generate workbook and add the worksheet */
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+    XLSX.utils.book_append_sheet(wb, ws, this.sheetName);
 
     /* save to file */
     XLSX.writeFile(wb, fileName);
@@ -113,5 +140,6 @@ export class AppComponent {
     this.editedRecords = [];
     this.previousFile = [];
     this.newFile = [];
+    this.writing = false;
   }
 }
