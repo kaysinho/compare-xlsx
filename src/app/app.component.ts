@@ -31,7 +31,8 @@ export class AppComponent {
     reader.onload = (event) => {
       const data = reader.result;
       workBook = XLSX.read(data, { type: 'binary' });
-      const ref = workBook.Sheets.Sheet1['!ref'];
+      const nameSheet = workBook.SheetNames[0]
+      const ref = workBook.Sheets[nameSheet]['!ref'];
       const endAt = ref.split(':')[1];
       const range = `${this.startAt}:${endAt}`;
       jsonData = workBook.SheetNames.reduce((initial: any, name: any) => {
