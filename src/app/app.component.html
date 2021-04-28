@@ -8,9 +8,10 @@
         <input type="file" class="form-control-file" multiple="false" (change)="onFileChange(NEW, $event)"
           accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
           id="newFile" />
-          <div class="spinner-border" role="status" *ngIf="readingNewFile">
-            <span class="sr-only"></span>
-          </div>
+        <div class="spinner-border" role="status" *ngIf="readingNewFile">
+          <span class="sr-only"></span>
+        </div>
+
       </div>
     </div>
 
@@ -21,9 +22,9 @@
         <input type="file" class="form-control-file" multiple="false" (change)="onFileChange(OLD, $event)"
           accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
           id="previousFile" />
-          <div class="spinner-border" role="status" *ngIf="readingPreviousFile">
-            <span class="sr-only"></span>
-          </div>
+        <div class="spinner-border" role="status" *ngIf="readingPreviousFile">
+          <span class="sr-only"></span>
+        </div>
       </div>
     </div>
   </form>
@@ -35,44 +36,55 @@
       </button>
     </div>
     <div class="col-md-6">
-      <button [disabled]="newFile.length < 1 || previousFile < 1" type="button" class="btn btn-secondary btn-lg mx-auto"
+      <button type="button" class="btn btn-secondary btn-lg mx-auto"
         (click)="reset()">
         Reset
       </button>
     </div>
   </div>
 
-  <ul class="list-group">
-    <li class="list-group-item">
-      New: {{ newRecords?.length }}
-      <button type="button" [disabled]="newRecords.length < 1" class="btn btn-primary mx-auto"
-        (click)="download('new')">
-        Download
-      </button>
-      <div class="spinner-border" role="status" *ngIf="writing && newRecords.length == 0">
-        <span class="sr-only"></span>
-      </div>
-    </li>
-    <li class="list-group-item">
-      Deleted: {{ deletedRecords?.length }}
-      <button type="button" [disabled]="deletedRecords.length < 1" class="btn btn-primary mx-auto"
-        (click)="download('deleted')">
-        Download
-      </button>
-      <div class="spinner-border" role="status" *ngIf="writing && deletedRecords.length == 0">
-        <span class="sr-only"></span>
-      </div>
-    </li>
-    <li class="list-group-item">
-      Updated: {{ editedRecords?.length }}
-      <button type="button" [disabled]="editedRecords.length < 1" class="btn btn-primary mx-auto"
-        (click)="download('updated')">
-        Download
-      </button>
+ 
 
-      <div class="spinner-border" role="status" *ngIf="writing && editedRecords.length == 0">
-        <span class="sr-only"></span>
-      </div>
-    </li>
-  </ul>
+  <div class="row card-columns">
+
+    <div class="card text-center p-3 col-md-4">
+      <blockquote class="blockquote mb-0">
+        <p>New records {{ newRecords?.length }}</p>
+        <div class="spinner-border" *ngIf="writingNewFiles" role="status" >
+          <span class="sr-only"></span>
+        </div>
+        <button type="button"*ngIf="newRecords.length > 0 && !writingNewFiles" class="btn btn-primary mx-auto"
+          (click)="download('new')">
+          Download
+        </button>
+      </blockquote>
+    </div>
+
+    <div class="card text-center p-3  col-md-4">
+      <blockquote class="blockquote mb-0">
+        <p>Deleted records {{ deletedRecords?.length }}</p>
+        <div class="spinner-border" *ngIf="writingDeletedFiles" role="status" >
+          <span class="sr-only"></span>
+        </div>
+        <button type="button" *ngIf="deletedRecords.length > 0 && !writingDeletedFiles" class="btn btn-primary mx-auto"
+          (click)="download('deleted')">
+          Download
+        </button>
+      </blockquote>
+    </div>
+
+    <div class="card text-center p-3  col-md-4">
+      <blockquote class="blockquote mb-0">
+        <p>Edited records {{ editedRecords?.length }}</p>
+        <div class="spinner-border" *ngIf="writingEditedFiles" role="status" >
+          <span class="sr-only"></span>
+        </div>
+        <button type="button" *ngIf="editedRecords.length > 0 && !writingEditedFiles" class="btn btn-primary mx-auto"
+          (click)="download('updated')">
+          Download
+        </button>
+      </blockquote>
+    </div>
+
+  </div>
 </div>
