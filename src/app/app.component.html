@@ -1,27 +1,47 @@
 <h2 class="text-center">Global Employee Dataset Tool</h2>
-
+<input
+  id="uploadBtn"
+  type="file"
+  (change)="readExcel($event)"
+  class="upload input-common"
+  required
+/>
+<button (click)="generate()">Download</button>
 <div class="container">
   <form>
     <div class="row">
       <div class="form-group">
-        <label for="newFile">Add the new version of the Global Employee dataset Excel file</label>
-        <input type="file" class="form-control-file" multiple="false" (change)="onFileChange(NEW, $event)"
+        <label for="newFile"
+          >Add the new version of the Global Employee dataset Excel file</label
+        >
+        <input
+          type="file"
+          class="form-control-file"
+          multiple="false"
+          (change)="onFileChange(NEW, $event)"
           accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-          id="newFile" />
+          id="newFile"
+        />
         <div class="spinner-border" role="status" *ngIf="readingNewFile">
           <span class="sr-only"></span>
         </div>
-
       </div>
     </div>
 
     <div class="row">
       <div class="form-group">
-        <label for="previousFile">Add the previous version of the Global Employee dataset Excel
-          file</label>
-        <input type="file" class="form-control-file" multiple="false" (change)="onFileChange(OLD, $event)"
+        <label for="previousFile"
+          >Add the previous version of the Global Employee dataset Excel
+          file</label
+        >
+        <input
+          type="file"
+          class="form-control-file"
+          multiple="false"
+          (change)="onFileChange(OLD, $event)"
           accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-          id="previousFile" />
+          id="previousFile"
+        />
         <div class="spinner-border" role="status" *ngIf="readingPreviousFile">
           <span class="sr-only"></span>
         </div>
@@ -30,61 +50,76 @@
   </form>
   <div class="row">
     <div class="col-md-6">
-      <button type="button" class="btn btn-primary btn-lg mx-auto" (click)="compare()"
-        [disabled]="newFile.length < 1 || previousFile.length < 1">
+      <button
+        type="button"
+        class="btn btn-primary btn-lg mx-auto"
+        (click)="compare()"
+        [disabled]="newFile.length < 1 || previousFile.length < 1"
+      >
         Compare
       </button>
     </div>
     <div class="col-md-6">
-      <button type="button" class="btn btn-secondary btn-lg mx-auto"
-        (click)="reset()">
+      <button
+        type="button"
+        class="btn btn-secondary btn-lg mx-auto"
+        (click)="reset()"
+      >
         Reset
       </button>
     </div>
   </div>
 
- 
-
   <div class="row card-columns">
-
     <div class="card text-center p-3 col-md-4">
       <blockquote class="blockquote mb-0">
         <p>New records {{ newRecords?.length }}</p>
-        <div class="spinner-border" *ngIf="writingNewFiles" role="status" >
+        <div class="spinner-border" *ngIf="writingNewFiles" role="status">
           <span class="sr-only"></span>
         </div>
-        <button type="button"*ngIf="newRecords.length > 0 && !writingNewFiles" class="btn btn-primary mx-auto"
-          (click)="download('new')">
+        <button
+          type="button"
+          *ngIf="newRecords.length > 0 && !writingNewFiles"
+          class="btn btn-primary mx-auto"
+          (click)="download('new')"
+        >
           Download
         </button>
       </blockquote>
     </div>
 
-    <div class="card text-center p-3  col-md-4">
+    <div class="card text-center p-3 col-md-4">
       <blockquote class="blockquote mb-0">
         <p>Deleted records {{ deletedRecords?.length }}</p>
-        <div class="spinner-border" *ngIf="writingDeletedFiles" role="status" >
+        <div class="spinner-border" *ngIf="writingDeletedFiles" role="status">
           <span class="sr-only"></span>
         </div>
-        <button type="button" *ngIf="deletedRecords.length > 0 && !writingDeletedFiles" class="btn btn-primary mx-auto"
-          (click)="download('deleted')">
+        <button
+          type="button"
+          *ngIf="deletedRecords.length > 0 && !writingDeletedFiles"
+          class="btn btn-primary mx-auto"
+          (click)="download('deleted')"
+        >
           Download
         </button>
       </blockquote>
     </div>
 
-    <div class="card text-center p-3  col-md-4">
+    <div class="card text-center p-3 col-md-4">
       <blockquote class="blockquote mb-0">
         <p>Edited records {{ editedRecords?.length }}</p>
-        <div class="spinner-border" *ngIf="writingEditedFiles" role="status" >
+        <div class="spinner-border" *ngIf="writingEditedFiles" role="status">
           <span class="sr-only"></span>
         </div>
-        <button type="button" *ngIf="editedRecords.length > 0 && !writingEditedFiles" class="btn btn-primary mx-auto"
-          (click)="download('updated')">
+        <button
+          type="button"
+          *ngIf="editedRecords.length > 0 && !writingEditedFiles"
+          class="btn btn-primary mx-auto"
+          (click)="download('updated')"
+        >
           Download
         </button>
       </blockquote>
     </div>
-
   </div>
 </div>
