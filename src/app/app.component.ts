@@ -65,16 +65,19 @@ export class AppComponent {
         data = this.workbook.getWorksheet(1).getSheetValues();
         this.workbook.addWorksheet('sheet2');
         this.workSheet = this.workbook.getWorksheet(2);
-        try {
-          this.workbook
-            .getWorksheet(1)
-            .eachRow({ includeEmpty: true }, (row: any, rowNumber: any) => {
-              if (row.values.includes(this.columns[4])) {
-                data = data.slice(rowNumber, data.length);
-                throw new Error(); // we no longer need to iterate
-              }
-            });
-        } catch (error) {}
+        data = this.normalizeData(
+          this.workbook.getWorksheet(1).getSheetValues()
+        );
+        // try {
+        //   this.workbook
+        //     .getWorksheet(1)
+        //     .eachRow({ includeEmpty: true }, (row: any, rowNumber: any) => {
+        //       if (row.values.includes(this.columns[4])) {
+        //         data = data.slice(rowNumber, data.length);
+        //         throw new Error(); // we no longer need to iterate
+        //       }
+        //     });
+        // } catch (error) {}
         if (status === this.NEW) {
           this.newFile = data;
           this.readingNewFile = false;
@@ -94,7 +97,7 @@ export class AppComponent {
     }); // ! low performance: remove empty values from rows. A workaround: https://github.com/exceljs/exceljs/issues/100
     switch (tableType) {
       case this.NEWSHEET:
-        const newWorkSheet = this.newWorkBook.getWorksheet(1);
+        const newWorkSheet = this.editedWorkBook.getWorksheet(1);
         if (newWorkSheet) {
           newWorkSheet.addTable(this.defaultTableDataSet(filteredRows));
         } else {
@@ -104,28 +107,29 @@ export class AppComponent {
         }
         break;
       case this.EDITEDSHEET:
-        const editedWorkSheet = this.editedWorkBook.getWorksheet(1);
-        if (editedWorkSheet) {
-          editedWorkSheet.addTable(this.defaultTableDataSet(filteredRows));
-        } else {
-          this.editedWorkBook
-            .addWorksheet(this.EDITEDSHEET)
-            .addTable(this.defaultTableDataSet(filteredRows));
-        }
+        // const editedWorkSheet = this.editedWorkBook.getWorksheet(1);
+        // if (editedWorkSheet) {
+        //   editedWorkSheet.addTable(this.defaultTableDataSet(filteredRows));
+        // } else {
+        //   this.editedWorkBook
+        //     .addWorksheet(this.EDITEDSHEET)
+        //     .addTable(this.defaultTableDataSet(filteredRows));
+        // }
         break;
       case this.REMOVEDSHEET:
-        const removedWorkSheet = this.removedWorkBook.getWorksheet(1);
-        if (removedWorkSheet) {
-          removedWorkSheet.addTable(this.defaultTableDataSet(filteredRows));
-        } else {
-          this.removedWorkBook
-            .addWorksheet(this.REMOVEDSHEET)
-            .addTable(this.defaultTableDataSet(filteredRows));
-        }
+        // const removedWorkSheet = this.removedWorkBook.getWorksheet(1);
+        // if (removedWorkSheet) {
+        //   removedWorkSheet.addTable(this.defaultTableDataSet(filteredRows));
+        // } else {
+        //   this.removedWorkBook
+        //     .addWorksheet(this.REMOVEDSHEET)
+        //     .addTable(this.defaultTableDataSet(filteredRows));
+        // }
         break;
     }
   }
   defaultTableDataSet(rows: any): Excel.TableProperties {
+    console.log(rows);
     return {
       name: 'Table',
       ref: 'A1',
@@ -232,5 +236,58 @@ export class AppComponent {
     this.writingNewFiles = false;
     this.writingEditedFiles = false;
     this.writingDeletedFiles = false;
+  }
+  normalizeData(data: any) {
+    const newData: Array<any> = [];
+    console.log(data);
+    /** Delete first rows */
+    let i = 0;
+    let rowsFound = false;
+    while (!rowsFound) {
+      if (data[i].length > 12) {
+        rowsFound = true;
+      } else {
+        i++;
+      }
+    }
+    data = data.slice(i, data.length);
+    /** End delete first rows */
+
+    // It's for know the mandatory column positions
+    this.firstRow(data[0]);
+
+    // We create a new array only with the mandatory columns
+    const percentage = 0;
+    for (let i = 0; i < data.length; i++) {
+      const row = this.normalizeRow(data[i]);
+      /*percentage = (((i+1) * 100) / data.length)
+      this.readingPercentagePreviousFile = percentage;
+      this.readingPercentageNewFile = percentage;
+      console.log(percentage)*/
+      if (row.length > 0) {
+        newData.push(row);
+      }
+    }
+
+    return newData;
+  }
+  firstRow(row: Array<any>) {
+    this.columPositions = [];
+
+    for (let i = 0; i < row.length; i++) {
+      if (this.columns.includes(row[i])) {
+        this.columPositions.push(i);
+      }
+    }
+  }
+
+  normalizeRow(row: Array<any>): Array<any> {
+    const newRow: Array<any> = [];
+    for (let i = 0; i < row.length; i++) {
+      if (this.columPositions.includes(i)) {
+        newRow.push(row[i]);
+      }
+    }
+    return newRow;
   }
 }
