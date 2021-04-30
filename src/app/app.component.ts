@@ -9,12 +9,6 @@ import * as fileSaver from 'file-saver';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  myWorkbook = new Excel.Workbook();
-  readingNewFile = false;
-  readingPreviousFile = false;
-  writingNewFiles = false;
-  writingEditedFiles = false;
-  writingDeletedFiles = false;
   readonly EXCELTYPE =
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
   readonly NEW = 'new';
@@ -22,7 +16,6 @@ export class AppComponent {
   readonly NEWSHEET = 'new_sheet';
   readonly REMOVEDSHEET = 'removed_sheet';
   readonly EDITEDSHEET = 'edited_sheet';
-  columPositions: Array<number> = [];
   readonly columns: Array<string> = [
     'Region',
     'Country',
@@ -41,18 +34,21 @@ export class AppComponent {
     'EA Name',
     'EA Phone',
   ];
+  readingNewFile = false;
+  readingPreviousFile = false;
+  writingNewFiles = false;
+  writingEditedFiles = false;
+  writingDeletedFiles = false;
   newFile: any = [];
   previousFile: any = [];
-  updateEveryMS = 1000;
   newRecords: Array<any> = [];
   deletedRecords: Array<any> = [];
   editedRecords: Array<any> = [];
-  sheetName = '';
+  columnPositions: Array<number> = [];
   workbook = new Excel.Workbook();
   newWorkBook = new Excel.Workbook();
   removedWorkBook = new Excel.Workbook();
   editedWorkBook = new Excel.Workbook();
-  workSheet: any;
   constructor() {}
   readExcel(status: any, event: any): void {
     const target: DataTransfer = event.target as DataTransfer;
@@ -60,29 +56,35 @@ export class AppComponent {
       return;
     }
     const arryBuffer = new Response(target.files[0]).arrayBuffer();
-    arryBuffer.then((data: any) => {
-      this.workbook.xlsx.load(data).then(() => {
-        data = this.workbook.getWorksheet(1).getSheetValues();
-        this.workbook.addWorksheet('sheet2');
-        this.workSheet = this.workbook.getWorksheet(2);
-        data = this.normalizeData(
-          this.workbook.getWorksheet(1).getSheetValues()
-        );
-        // try {
-        //   this.workbook
-        //     .getWorksheet(1)
-        //     .eachRow({ includeEmpty: true }, (row: any, rowNumber: any) => {
-        //       if (row.values.includes(this.columns[4])) {
-        //         data = data.slice(rowNumber, data.length);
-        //         throw new Error(); // we no longer need to iterate
-        //       }
-        //     });
-        // } catch (error) {}
+    arryBuffer.then((buffer: any) => {
+      this.workbook.xlsx.load(buffer).then(() => {
+        const newData: Array<any> = [];
+        let dataSheet: any = this.workbook.getWorksheet(1).getSheetValues();
+        try {
+          this.workbook
+            .getWorksheet(1)
+            .eachRow({ includeEmpty: true }, (row: any, rowNumber: any) => {
+              /* GUI Column */
+              if (row.values.includes(this.columns[4])) {
+                dataSheet = dataSheet.slice(rowNumber, dataSheet.length);
+                this.firstRow(dataSheet[0]);
+                for (let i = 0; i < dataSheet.length; i++) {
+                  const row = this.normalizeRow(dataSheet[i]);
+                  if (row.length > 0) {
+                    newData.push(row);
+                  }
+                }
+                throw new Error(); // we no longer need to iterate
+              }
+            });
+        } catch (error) {
+          dataSheet = newData;
+        }
         if (status === this.NEW) {
-          this.newFile = data;
+          this.newFile = dataSheet;
           this.readingNewFile = false;
         } else {
-          this.previousFile = data;
+          this.previousFile = dataSheet;
           this.readingPreviousFile = false;
         }
         this.workbook.removeWorksheet(1);
@@ -97,7 +99,7 @@ export class AppComponent {
     }); // ! low performance: remove empty values from rows. A workaround: https://github.com/exceljs/exceljs/issues/100
     switch (tableType) {
       case this.NEWSHEET:
-        const newWorkSheet = this.editedWorkBook.getWorksheet(1);
+        const newWorkSheet = this.newWorkBook.getWorksheet(1);
         if (newWorkSheet) {
           newWorkSheet.addTable(this.defaultTableDataSet(filteredRows));
         } else {
@@ -107,29 +109,28 @@ export class AppComponent {
         }
         break;
       case this.EDITEDSHEET:
-        // const editedWorkSheet = this.editedWorkBook.getWorksheet(1);
-        // if (editedWorkSheet) {
-        //   editedWorkSheet.addTable(this.defaultTableDataSet(filteredRows));
-        // } else {
-        //   this.editedWorkBook
-        //     .addWorksheet(this.EDITEDSHEET)
-        //     .addTable(this.defaultTableDataSet(filteredRows));
-        // }
+        const editedWorkSheet = this.editedWorkBook.getWorksheet(1);
+        if (editedWorkSheet) {
+          editedWorkSheet.addTable(this.defaultTableDataSet(filteredRows));
+        } else {
+          this.editedWorkBook
+            .addWorksheet(this.EDITEDSHEET)
+            .addTable(this.defaultTableDataSet(filteredRows));
+        }
         break;
       case this.REMOVEDSHEET:
-        // const removedWorkSheet = this.removedWorkBook.getWorksheet(1);
-        // if (removedWorkSheet) {
-        //   removedWorkSheet.addTable(this.defaultTableDataSet(filteredRows));
-        // } else {
-        //   this.removedWorkBook
-        //     .addWorksheet(this.REMOVEDSHEET)
-        //     .addTable(this.defaultTableDataSet(filteredRows));
-        // }
+        const removedWorkSheet = this.removedWorkBook.getWorksheet(1);
+        if (removedWorkSheet) {
+          removedWorkSheet.addTable(this.defaultTableDataSet(filteredRows));
+        } else {
+          this.removedWorkBook
+            .addWorksheet(this.REMOVEDSHEET)
+            .addTable(this.defaultTableDataSet(filteredRows));
+        }
         break;
     }
   }
   defaultTableDataSet(rows: any): Excel.TableProperties {
-    console.log(rows);
     return {
       name: 'Table',
       ref: 'A1',
@@ -199,18 +200,21 @@ export class AppComponent {
           this.newRecords = newRecords;
           this.createTable(this.NEWSHEET, this.newRecords);
           this.writingNewFiles = true;
+          console.log(newRecords);
         }
         if (deletedRecords) {
           this.deletedRecords = deletedRecords;
           this.createTable(this.REMOVEDSHEET, this.deletedRecords);
           this.writingDeletedFiles = true;
           this.writingNewFiles = false;
+          console.log(deletedRecords);
         }
         if (editedRecords) {
           this.editedRecords = editedRecords;
           this.createTable(this.EDITEDSHEET, this.editedRecords);
           this.writingDeletedFiles = false;
           this.writingEditedFiles = true;
+          console.log(editedRecords);
         }
         if (finished) {
           this.writingEditedFiles = false;
@@ -237,54 +241,18 @@ export class AppComponent {
     this.writingEditedFiles = false;
     this.writingDeletedFiles = false;
   }
-  normalizeData(data: any) {
-    const newData: Array<any> = [];
-    console.log(data);
-    /** Delete first rows */
-    let i = 0;
-    let rowsFound = false;
-    while (!rowsFound) {
-      if (data[i].length > 12) {
-        rowsFound = true;
-      } else {
-        i++;
-      }
-    }
-    data = data.slice(i, data.length);
-    /** End delete first rows */
-
-    // It's for know the mandatory column positions
-    this.firstRow(data[0]);
-
-    // We create a new array only with the mandatory columns
-    const percentage = 0;
-    for (let i = 0; i < data.length; i++) {
-      const row = this.normalizeRow(data[i]);
-      /*percentage = (((i+1) * 100) / data.length)
-      this.readingPercentagePreviousFile = percentage;
-      this.readingPercentageNewFile = percentage;
-      console.log(percentage)*/
-      if (row.length > 0) {
-        newData.push(row);
-      }
-    }
-
-    return newData;
-  }
-  firstRow(row: Array<any>) {
-    this.columPositions = [];
-
+  firstRow(row: Array<any>): void {
+    this.columnPositions = [];
     for (let i = 0; i < row.length; i++) {
       if (this.columns.includes(row[i])) {
-        this.columPositions.push(i);
+        this.columnPositions.push(i);
       }
     }
   }
-
   normalizeRow(row: Array<any>): Array<any> {
     const newRow: Array<any> = [];
     for (let i = 0; i < row.length; i++) {
-      if (this.columPositions.includes(i)) {
+      if (this.columnPositions.includes(i)) {
         newRow.push(row[i]);
       }
     }
