@@ -1,12 +1,4 @@
 <h2 class="text-center">Global Employee Dataset Tool</h2>
-<input
-  id="uploadBtn"
-  type="file"
-  (change)="readExcel($event)"
-  class="upload input-common"
-  required
-/>
-<button (click)="generate()">Download</button>
 <div class="container">
   <form>
     <div class="row">
@@ -18,7 +10,7 @@
           type="file"
           class="form-control-file"
           multiple="false"
-          (change)="onFileChange(NEW, $event)"
+          (change)="readExcel(NEW, $event)"
           accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
           id="newFile"
         />
@@ -38,7 +30,7 @@
           type="file"
           class="form-control-file"
           multiple="false"
-          (change)="onFileChange(OLD, $event)"
+          (change)="readExcel(OLD, $event)"
           accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
           id="previousFile"
         />
@@ -81,7 +73,7 @@
           type="button"
           *ngIf="newRecords.length > 0 && !writingNewFiles"
           class="btn btn-primary mx-auto"
-          (click)="download('new')"
+          (click)="download(NEWSHEET)"
         >
           Download
         </button>
@@ -98,7 +90,7 @@
           type="button"
           *ngIf="deletedRecords.length > 0 && !writingDeletedFiles"
           class="btn btn-primary mx-auto"
-          (click)="download('deleted')"
+          (click)="download(REMOVEDSHEET)"
         >
           Download
         </button>
@@ -115,7 +107,7 @@
           type="button"
           *ngIf="editedRecords.length > 0 && !writingEditedFiles"
           class="btn btn-primary mx-auto"
-          (click)="download('updated')"
+          (click)="download(EDITEDSHEET)"
         >
           Download
         </button>

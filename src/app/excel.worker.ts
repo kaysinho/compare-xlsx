@@ -11,8 +11,9 @@ addEventListener('message', ({ data }) => {
     JSON.stringify(a) === JSON.stringify(b);
 
   // new
+  console.log(newFile);
   for (const current of newFile) {
-    if (!oldFile.some((row: any) => row[4] === current[4])) {
+    if (current && !oldFile.some((row: any) => row[5] === current[5])) {
       newRecords.push(current);
       postMessage({ newRecords });
     }
@@ -21,7 +22,7 @@ addEventListener('message', ({ data }) => {
 
   // deleted
   for (const old of oldFile) {
-    if (!newFile.some((row: any) => row[4] === old[4])) {
+    if (old && !newFile.some((row: any) => row[5] === old[5])) {
       deletedRecords.push(old);
       postMessage({ deletedRecords });
     }
@@ -31,7 +32,7 @@ addEventListener('message', ({ data }) => {
   // updated
   for (const old of oldFile) {
     for (const current of newFile) {
-      if (old[4] === current[4]) {
+      if (old && current && old[5] === current[5]) {
         if (!equals(old, current)) {
           editedRecords.push(current);
           postMessage({ editedRecords });
